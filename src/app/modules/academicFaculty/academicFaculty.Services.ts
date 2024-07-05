@@ -22,6 +22,9 @@ const updateAcademicFaculty = async (
   const result = await AcademicFacultyModel.findByIdAndUpdate(
     { _id: id },
     payload,
+    {
+      new: true,
+    },
   );
   return result;
 };
