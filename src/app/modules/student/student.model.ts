@@ -1,11 +1,12 @@
 import { Schema, model } from 'mongoose';
 import {
-  StudentModel,
   TGuardian,
   TLocalGuardian,
   TStudent,
   TUserName,
 } from './student.interface';
+import AppError from '../../errors/AppError';
+import httpStatus from 'http-status';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -158,6 +159,18 @@ const studentSchema = new Schema<TStudent, StudentModel>(
 studentSchema.virtual('fullName').get(function () {
   return this.name.firstName + this.name.middleName + this.name.lastName;
 });
+
+// pre hooks for isStudent exist
+
+studentSchema.pre('save', async function (next) {
+  const isStudentExist = await Student.findOne({ email: this.email });
+  if (isStudentExist) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'This Student already Exist');
+  }
+  next();
+});
+
+// pre middleware for cheack student isExist
 
 // Query Middleware
 studentSchema.pre('find', function (next) {

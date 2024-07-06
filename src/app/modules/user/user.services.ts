@@ -7,6 +7,7 @@ import { Student } from '../student/student.model';
 import { TUser } from './user.interface';
 import { userModel } from './user.model';
 import { generateStudentId } from './user.utils';
+import mongoose from 'mongoose';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -29,21 +30,48 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   if (!admissionSemester) {
     throw new AppError(httpStatus.NOT_FOUND, 'Admission semester not found');
   }
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    userData.id = await generateStudentId(admissionSemester);
+    // create a user
+    const newUser = await userModel.create([userData], { session });
 
-  userData.id = await generateStudentId(admissionSemester);
-  // create a user
-  const newUser = await userModel.create(userData);
-
-  // create a student
-  if (Object.keys(newUser).length) {
+    // create a student
+    if (!newUser.length) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Faild to create user');
+    }
     // set id, _id as user
-    payload.id = newUser.id;
+    payload.id = newUser[0].id;
 
-    payload.user = newUser._id; //reference _id
+    payload.user = newUser[0]._id; //reference _id
 
-    const newStudent = await Student.create(payload);
+    const newStudent = await Student.create([payload], { session });
+    if (!newStudent) {
+      throw new AppError(httpStatus.BAD_REQUEST, 'Faild to create Student');
+    }
+    await session.commitTransaction();
+    await session.endSession();
     return newStudent;
+  } catch (err) {
+    await session.abortTransaction();
+    await session.endSession();
   }
+
+  // userData.id = await generateStudentId(admissionSemester);
+  // // create a user
+  // const newUser = await userModel.create(userData);
+
+  // // create a student
+  // if (Object.keys(newUser).length) {
+  //   // set id, _id as user
+  //   payload.id = newUser.id;
+
+  //   payload.user = newUser._id; //reference _id
+
+  //   const newStudent = await Student.create(payload);
+  //   return newStudent;
+  // }
 };
 
 export const UserServices = {
