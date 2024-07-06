@@ -56,22 +56,8 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
   } catch (err) {
     await session.abortTransaction();
     await session.endSession();
+    throw new AppError(httpStatus.BAD_REQUEST, 'Failed to create user');
   }
-
-  // userData.id = await generateStudentId(admissionSemester);
-  // // create a user
-  // const newUser = await userModel.create(userData);
-
-  // // create a student
-  // if (Object.keys(newUser).length) {
-  //   // set id, _id as user
-  //   payload.id = newUser.id;
-
-  //   payload.user = newUser._id; //reference _id
-
-  //   const newStudent = await Student.create(payload);
-  //   return newStudent;
-  // }
 };
 
 export const UserServices = {
