@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { AcademicFacultyControllers } from './academicFaculty.controllers';
-import validateRequest from './../../middleware/validateRequest';
+import validateRequest from '../../middleware/validateRequest';
 import { AcademicFacultyValidate } from './academicFaculty.validation';
 
 const router = Router();
