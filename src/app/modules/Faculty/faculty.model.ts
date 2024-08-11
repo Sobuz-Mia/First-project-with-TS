@@ -32,7 +32,7 @@ const facultySchema = new Schema<TFaculty>(
       type: Schema.Types.ObjectId,
       required: [true, 'User id is required'],
       unique: true,
-      ref: 'User',
+      ref: 'user',
     },
     designation: {
       type: String,
@@ -80,7 +80,7 @@ const facultySchema = new Schema<TFaculty>(
     academicDepartment: {
       type: Schema.Types.ObjectId,
       required: [true, 'User id is required'],
-      ref: 'User',
+      ref: 'user',
     },
     isDeleted: {
       type: Boolean,
