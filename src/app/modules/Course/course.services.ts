@@ -30,23 +30,7 @@ const getSingleCourseFromDB = async (id: string) => {
   );
   return result;
 };
-const assignFacultyWithCourseIntoDB = async (
-  id: string,
-  payload: Partial<TCourseFaculty>,
-) => {
-  const result = await CourseFaculty.findByIdAndUpdate(
-    id,
-    {
-      course: id,
-      $addToSet: { faculties: { $each: payload } },
-    },
-    {
-      upsert: true,
-      new: true,
-    },
-  );
-  return result;
-};
+
 const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
   const { preRequisiteCourse, ...courseRemainingData } = payload;
   const session = await mongoose.startSession();
@@ -119,6 +103,39 @@ const deleteCourseIntoDB = async (id: string) => {
   );
   return result;
 };
+const assignFacultyWithCourseIntoDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+      course: id,
+      $addToSet: { faculties: { $each: payload } },
+    },
+    {
+      upsert: true,
+      new: true,
+    },
+  );
+  return result;
+};
+const removeFacultyFromCourseFromDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseFaculty.findByIdAndUpdate(
+    id,
+    {
+      $pull: { faculties: { $in: payload } },
+    },
+    {
+      upsert: true,
+      new: true,
+    },
+  );
+  return result;
+};
 
 export const CourseServices = {
   createCourseIntoDB,
@@ -127,4 +144,5 @@ export const CourseServices = {
   updateCourseIntoDB,
   deleteCourseIntoDB,
   assignFacultyWithCourseIntoDB,
+  removeFacultyFromCourseFromDB,
 };
