@@ -18,7 +18,9 @@ const createSemesterRegistration = catchAsync(async (req, res) => {
 
 const getAllSemesterRegistration = catchAsync(async (req, res) => {
   const result =
-    await SemesterRegistrationServices.getAllSemesterRegistrationFromDB();
+    await SemesterRegistrationServices.getAllSemesterRegistrationFromDB(
+      req.query,
+    );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -27,8 +29,9 @@ const getAllSemesterRegistration = catchAsync(async (req, res) => {
   });
 });
 const getSingleSemesterRegistration = catchAsync(async (req, res) => {
+  const { id } = req.params;
   const result =
-    await SemesterRegistrationServices.getSingleSemesterRegistrationFromDB();
+    await SemesterRegistrationServices.getSingleSemesterRegistrationFromDB(id);
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -37,8 +40,12 @@ const getSingleSemesterRegistration = catchAsync(async (req, res) => {
   });
 });
 const updateSemesterRegistration = catchAsync(async (req, res) => {
+  const { id } = req.params;
   const result =
-    await SemesterRegistrationServices.updateSemesterRegistrationIntoDB();
+    await SemesterRegistrationServices.updateSemesterRegistrationIntoDB(
+      id,
+      req.body,
+    );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
