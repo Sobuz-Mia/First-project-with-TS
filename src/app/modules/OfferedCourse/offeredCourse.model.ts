@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
-import { TOfferedCourse } from './OfferedCourse.interface';
 import { Days } from './offeredCourse.const';
+import { TOfferedCourse } from './offeredCourse.interface';
 
 const offeredCourseSchema = new Schema<TOfferedCourse>(
   {
@@ -42,10 +42,12 @@ const offeredCourseSchema = new Schema<TOfferedCourse>(
       type: Number,
       required: true,
     },
-    days: {
-      type: String,
-      enum: Days,
-    },
+    days: [
+      {
+        type: String,
+        enum: Days,
+      },
+    ],
     startTime: {
       type: String,
       required: true,
