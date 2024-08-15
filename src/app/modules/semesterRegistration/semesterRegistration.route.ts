@@ -16,6 +16,10 @@ router.get(
   '/:id',
   SemesterRegistrationController.getSingleSemesterRegistration,
 );
+router.delete(
+  '/:id',
+  SemesterRegistrationController.deleteSemesterRegistration,
+);
 router.patch(
   '/:id',
   validateRequest(
