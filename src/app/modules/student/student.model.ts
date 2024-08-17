@@ -75,7 +75,7 @@ const localGuradianSchema = new Schema<TLocalGuardian>({
   },
 });
 
-const studentSchema = new Schema<TStudent, StudentModel>(
+const studentSchema = new Schema<TStudent>(
   {
     id: {
       type: String,
@@ -86,7 +86,7 @@ const studentSchema = new Schema<TStudent, StudentModel>(
       type: Schema.Types.ObjectId,
       required: [true, 'User id is required'],
       unique: true,
-      ref: 'User',
+      ref: 'user',
     },
     name: {
       type: userNameSchema,
@@ -194,4 +194,4 @@ studentSchema.statics.isUserExists = async function (id: string) {
   return existingUser;
 };
 
-export const Student = model<TStudent, StudentModel>('Student', studentSchema);
+export const Student = model<TStudent>('Student', studentSchema);
