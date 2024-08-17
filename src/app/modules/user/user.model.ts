@@ -18,6 +18,9 @@ const userSchema = new Schema<TUser, UserModel>(
       type: Boolean,
       default: true,
     },
+    passwordChangeAt: {
+      type: Date,
+    },
     role: {
       type: String,
       enum: ['admin', 'student', 'faculty'],
@@ -57,15 +60,15 @@ userSchema.post('save', function (doc, next) {
 });
 // check if user exist in user model using statics methods
 userSchema.statics.isUserExistByCustomId = async function (id: string) {
-  return await userModel.findOne({ id });
+  return await userModel.findOne({ id }).select('+password');
 };
 
 // compare password using statics methods
 userSchema.statics.isPasswordMatched = async function (
-  planTextPassword,
+  plainTextPassword,
   hashedPassword,
 ) {
-  return await bcrypt.compare(planTextPassword, hashedPassword);
+  return await bcrypt.compare(plainTextPassword, hashedPassword);
 };
 // statics method for is user already deleted
 userSchema.statics.isUserDeleted = async function (isDeleted) {
@@ -78,5 +81,13 @@ userSchema.statics.userBlock = function (status) {
   }
   return false;
 };
-
+// checking token Timestamp vs password change timestamp
+userSchema.statics.isJWTIssuedBeforePasswordChanged = function (
+  passwordChangedTimestamp: Date,
+  jwtIssuedTimestamp: number,
+) {
+  const passwordChangedTime =
+    new Date(passwordChangedTimestamp).getTime() / 1000;
+  return passwordChangedTime > jwtIssuedTimestamp;
+};
 export const userModel = model<TUser, UserModel>('user', userSchema);
