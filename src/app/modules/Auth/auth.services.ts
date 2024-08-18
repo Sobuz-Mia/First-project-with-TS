@@ -1,11 +1,12 @@
 import httpStatus from 'http-status';
 import AppError from '../../errors/AppError';
 import { TLoginUser } from './auth.interface';
-import  { JwtPayload } from 'jsonwebtoken';
+import { JwtPayload } from 'jsonwebtoken';
 import config from '../../config';
 import { userModel } from './../user/user.model';
 import bcrypt from 'bcrypt';
 import { createToken } from './auth.utils';
+import jwt from 'jsonwebtoken';
 
 const loginUser = async (payload: TLoginUser) => {
   // checking if the user is exist
@@ -90,7 +91,56 @@ const changePassword = async (
   return null;
 };
 
+const refreshToken = async (token: string) => {
+  // if the token is send from the client
+  if (!token) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
+  }
+  // check if the token is valid
+
+  const decoded = jwt.verify(
+    token,
+    config.jwt_refresh_secret as string,
+  ) as JwtPayload;
+  const { userId, iat } = decoded;
+  // checking if the user is exist
+  const user = await userModel.isUserExistByCustomId(userId);
+  if (!user) {
+    throw new AppError(httpStatus.NOT_FOUND, 'This user not found');
+  }
+  //   checking if the user already deleted
+  if (await userModel.isUserDeleted(user?.isDeleted)) {
+    throw new AppError(httpStatus.FORBIDDEN, 'This user is already deleted');
+  }
+  //   checking user status
+  if (await userModel.userBlock(user?.status)) {
+    throw new AppError(httpStatus.BAD_REQUEST, 'This user is already blocked');
+  }
+  // checking token issued timestamp and password change timestamp
+  if (
+    user?.passwordChangeAt &&
+    userModel.isJWTIssuedBeforePasswordChanged(
+      user?.passwordChangeAt,
+      iat as number,
+    )
+  ) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
+  }
+  //   create token and send to the client
+  const jwtPayload = {
+    userId: user?.id,
+    role: user?.role,
+  };
+  const accessToken = createToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+  return { accessToken };
+};
+
 export const AuthServices = {
   loginUser,
   changePassword,
+  refreshToken,
 };
