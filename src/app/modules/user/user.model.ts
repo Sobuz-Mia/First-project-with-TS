@@ -58,6 +58,7 @@ userSchema.post('save', function (doc, next) {
   doc.password = '';
   next();
 });
+
 // check if user exist in user model using statics methods
 userSchema.statics.isUserExistByCustomId = async function (id: string) {
   return await userModel.findOne({ id }).select('+password');
