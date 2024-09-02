@@ -22,7 +22,7 @@ router.post(
   validateRequest(createFacultyValidationSchema),
   UserControllers.createFaculty,
 );
-
+router.get('/me', auth('admin', 'faculty', 'student'), UserControllers.getMe);
 router.post(
   '/create-admin',
   // auth(USER_ROLE.admin),
