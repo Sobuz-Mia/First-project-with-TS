@@ -6,7 +6,11 @@ import catchAsync from '../../utils/catchAsync';
 // here catchAsync is a higher order function
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: StudentData } = req.body;
-  const result = await UserServices.createStudentIntoDB(password, StudentData);
+  const result = await UserServices.createStudentIntoDB(
+    req.file,
+    password,
+    StudentData,
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,

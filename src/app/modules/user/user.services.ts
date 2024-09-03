@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import httpStatus from 'http-status';
 import config from '../../config';
 import AppError from '../../errors/AppError';
@@ -17,8 +18,11 @@ import { AcademicDepartmentModel } from '../academicDepartment/academicDepartmen
 import { Faculty } from '../Faculty/faculty.model';
 import { Admin } from '../Admin/admin.model';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
-
-const createStudentIntoDB = async (password: string, payload: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  payload: TStudent,
+) => {
   // create a user object
   const userData: Partial<TUser> = {};
   // is password is not given used default password
@@ -45,7 +49,9 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     session.startTransaction();
     userData.id = await generateStudentId(admissionSemester);
     //send image to cloudinary
-    sendImageToCloudinary();
+    const imageName = `${userData?.id}${payload?.name?.firstName}`;
+    const path = file?.path;
+    const { secure_url }= await sendImageToCloudinary(imageName, path);
     // create a user
     const newUser = await userModel.create([userData], { session });
 
@@ -57,6 +63,7 @@ const createStudentIntoDB = async (password: string, payload: TStudent) => {
     payload.id = newUser[0].id;
 
     payload.user = newUser[0]._id; //reference _id
+    payload.profileImg = secure_url;
 
     const newStudent = await Student.create([payload], { session });
     if (!newStudent) {
