@@ -92,10 +92,6 @@ const changePassword = async (
 };
 
 const refreshToken = async (token: string) => {
-  // if the token is send from the client
-  if (!token) {
-    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
-  }
   // check if the token is valid
 
   const decoded = jwt.verify(
@@ -103,6 +99,11 @@ const refreshToken = async (token: string) => {
     config.jwt_refresh_secret as string,
   ) as JwtPayload;
   const { userId, iat } = decoded;
+  // if the token is send from the client
+  if (!token) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'You are not authorized!!');
+  }
+
   // checking if the user is exist
   const user = await userModel.isUserExistByCustomId(userId);
   if (!user) {
