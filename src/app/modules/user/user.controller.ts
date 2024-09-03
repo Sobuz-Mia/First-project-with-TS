@@ -6,7 +6,11 @@ import catchAsync from '../../utils/catchAsync';
 // here catchAsync is a higher order function
 const createStudent = catchAsync(async (req, res) => {
   const { password, student: StudentData } = req.body;
-  const result = await UserServices.createStudentIntoDB(password, StudentData);
+  const result = await UserServices.createStudentIntoDB(
+    req.file,
+    password,
+    StudentData,
+  );
   sendResponse(res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -39,9 +43,19 @@ const createAdmin = catchAsync(async (req, res) => {
     data: result,
   });
 });
-
+const getMe = catchAsync(async (req, res) => {
+  const { userId, role } = req.user;
+  const result = await UserServices.getMe(userId, role);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User is retrieved succesfully',
+    data: result,
+  });
+});
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMe,
 };
